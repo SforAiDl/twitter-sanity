@@ -1,0 +1,1 @@
+This directory should contain code for scraping tweets and adding to a csv file
