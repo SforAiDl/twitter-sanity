@@ -1,4 +1,6 @@
-!pip3 install twint
+git clone https://github.com/twintproject/twint.git
+cd twint
+pip3 install . -r requirements.txt
 import twint
 
 # This function gets the list of people the user was following
@@ -24,7 +26,7 @@ def following_tweets(list_of_following):
     return followingtweets
     
 # This function gets the tweets the user retweeted over the past week
-def get_retweets(username)
+def get_retweets(username):
     c = twint.Config()
     c.Username = 'elonmusk'
     c.Since =  "2020-05-05 00:00:01" # need to make this dynamic
@@ -45,3 +47,11 @@ def get_likes(username):
     c.Output = "fav.csv"
     likes = twint.run.Favorites(c)
     return likes
+
+# Testing
+if __name__ == '__main__':
+   username = 'elonmusk'
+   list_of_following = get_following(username)
+   followingtweets = following_tweets(list_of_following)
+   retweets = get_retweets(username)
+   likes = get_likes(username)
