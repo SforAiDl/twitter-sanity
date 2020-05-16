@@ -1,6 +1,3 @@
-git clone https://github.com/twintproject/twint.git
-cd twint
-pip3 install . -r requirements.txt
 import twint
 
 # This function gets the list of people the user was following
@@ -17,7 +14,7 @@ def get_following(username):
 def following_tweets(list_of_following):
     for i in range(len(list_of_following)):
         c = twint.Config()
-        c.Username = following[i]
+        c.Username = list_of_following[i]
         c.Since =  "2020-05-05 00:00:01" # need to make this dynamic
         c.Custom["tweet"] = ["date","id", "username","tweet"]
         c.Output = "tweets.csv"
