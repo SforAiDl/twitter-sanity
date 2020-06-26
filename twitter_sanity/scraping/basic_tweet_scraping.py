@@ -1,54 +1,71 @@
-import twint
+import pandas as pd
+import twint 
+import csv
 
-# This function gets the list of people the user was following
-def get_following(username):
-    c = twint.Config()
-    c.Username = username
-    c.Pandas = True
-    twint.run.Following(c)
-    Following_df = twint.storage.panda.Follow_df
-    list_of_following = Following_df['following'][username]
-    return list_of_following
+class Tweet:
+  def __init__(self,username,start_date,end_date):
+    self.username= username
+    self.start_date= start_date
+    self.end_date= end_date
 
-# This function gets a list of tweets made by people the user follows over the past week
-def following_tweets(list_of_following):
-    for i in range(len(list_of_following)):
-        c = twint.Config()
-        c.Username = list_of_following[i]
-        c.Since =  "2020-05-05 00:00:01" # need to make this dynamic
-        c.Custom["tweet"] = ["date","id", "username","tweet"]
-        c.Output = "tweets.csv"
-        c.Store_csv = True
-        followingtweets = twint.run.Search(c)
-    return followingtweets
+#To get followings of the user
+  def get_followings(self):   
+    c= twint.Config()
+    c.Username= self.username
+    c.Store_csv= True
+    c.Output= self.username + '_Followings.csv'
+    followings_list= twint.run.Following(c)
+    return followings_list  
+
+
+#To get tweets of user's followings for the mentioned dates.
+  def following_tweets(self): 
+    self.get_followings()
     
-# This function gets the tweets the user retweeted over the past week
-def get_retweets(username):
+    c1= twint.Config()
+    
+    with open(self.username + '_Followings.csv') as csv1:
+      followings = list(csv1)
+    
+    for name in followings:
+      name.strip()
+      c1.Username= name
+      c1.Since = self.start_date
+      c1.Until = self.end_date
+      c1.Custom['tweet'] = ['date','time','username','name','tweet','retweets_count','likes_count']
+      c1.Store_csv = True
+      c1.Output = self.username + '_tweetData.csv'
+      twint.run.Search(c1) 
+
+#To get the tweets user retweeted between the mentioned dates
+  def get_retweets(self):
     c = twint.Config()
-    c.Username = 'elonmusk'
-    c.Since =  "2020-05-05 00:00:01" # need to make this dynamic
-    c.Custom["tweet"] = ["date","id", "username","tweet"]
-    c.Output = "rt.csv"
+    c.Username = self.username
+    c.Since =  self.start_date
+    c.Until = self.end_date
+    c.Custom['tweet']=['date','time','username','name','tweet']
     c.Store_csv = True
     c.Native_retweets = True
-    retweets = twint.run.Search(c)
-    return retweets
-    
-# This function gets the tweets the user liked over the past week
-def get_likes(username):
-    c = twint.Config()
-    c.Username = 'elonmusk'
-    c.Since =  "2020-05-05 00:00:01"
-    c.Custom["tweet"] = ["date","id", "username","tweet"]
-    c.Store_csv = True
-    c.Output = "fav.csv"
-    likes = twint.run.Favorites(c)
-    return likes
+    c.Output = self.username + "_retweets.csv"
+    retweets = twint.run.Search(c)     
 
-# Testing
-if __name__ == '__main__':
-   username = 'elonmusk'
-   list_of_following = get_following(username)
-   followingtweets = following_tweets(list_of_following)
-   retweets = get_retweets(username)
-   likes = get_likes(username)
+#To get the tweets liked by the user between the mentioned dates
+  def get_likes(self):
+    c= twint.Config()
+    c.Username = self.username
+    c.Since = self.start_date
+    c.Until = self.end_date
+    c.Store_csv = True
+    c.Output = self.username + "_liked_data.csv"
+    likes = twint.run.Favorites(c)
+
+#To scrape all the data and store in csv files
+  def scrape(self):
+    self.following_tweets()
+    self.get_retweets()
+    
+
+#Testing
+d= Tweet('realDonaldTrump','2020-06-14 00:00:01', '2020-06-24 00:00:01')
+d.scrape()
+
